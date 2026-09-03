@@ -1,0 +1,82 @@
+# Chinchilla-optimal budget: 33,000 steps = 20.0 tokens/parameter.
+# Context doubled to 512 to fix the short-range incoherence of the 8k run.
+# tokens/step held at 12,288 (6 * 4 * 512) so the LR schedule still applies.
+# Reuses the existing 112M-token corpus, so this is ~3.6 epochs. At 20M
+# parameters that repetition is cheap; watch val loss for the point where it
+# stops tracking train loss.
+# Expect ~7.5 GPU-hours on a T4 => two Kaggle sessions, using resume.
+seed: 42
+output_dir: /kaggle/working/minivigpt_outputs
+model:
+  vocab_size: 16000
+  max_seq_len: 512
+  dim: 384
+  n_layers: 8
+  n_heads: 6
+  hidden_dim: null
+  ffn_multiple_of: 256
+  dropout: 0.0
+  rope_theta: 10000.0
+  rms_eps: 1.0e-06
+  tie_embeddings: true
+  init_std: 0.02
+  scaled_residual_init: true
+  attention_impl: sdpa
+dataset:
+  name: undertheseanlp/UVW-2026
+  revision: a0a79294e4568137e25828bb3f2a4cde8546e1fb
+  text_column: content
+  quality_column: quality_score
+  category_column: main_category
+  train_split: train
+  validation_split: validation
+  test_split: test
+  min_chars: 100
+  min_quality_score: 5
+  tokenizer_articles: 50000
+  train_articles: 150000
+  validation_articles: 8000
+  test_articles: 8000
+  shuffle_buffer: 20000
+  deduplicate_exact: true
+  exclude_categories_contains:
+  - mục nội bộ Wikimedia
+  - trang định hướng Wikimedia
+  append_eos: true
+tokenizer:
+  vocab_size: 16000
+  min_frequency: 2
+  special_tokens:
+  - <pad>
+  - <unk>
+  - <eos>
+training:
+  max_steps: 33000
+  batch_size: 6
+  grad_accum_steps: 4
+  learning_rate: 0.0003
+  min_lr: 3.0e-05
+  warmup_steps: 500
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  adam_eps: 1.0e-08
+  grad_clip: 1.0
+  eval_interval: 1000
+  eval_batches: 30
+  test_batches: 50
+  eval_seed: 12345
+  test_seed: 54321
+  save_interval: 1000
+  log_interval: 50
+  precision: auto
+  compile: false
+resume:
+  auto_from_kaggle_input: true
+  checkpoint_glob: '**/checkpoint_latest.pt'
+sampling:
+  prompt: Trí tuệ nhân tạo
+  max_new_tokens: 120
+  temperature: 0.9
+  top_k: 50
+  top_p: 0.95

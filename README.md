@@ -11,6 +11,57 @@ Mục tiêu dự án là giúp lập trình viên và nhà nghiên cứu hiểu 
 
 ---
 
+## 📊 Kết quả
+
+| Model | Tham số | Ngữ cảnh | Token huấn luyện | tok/param | Val loss | **Perplexity** | GPU-giờ |
+|---|---|---|---|---|---|---|---|
+| `run_20m_8k` | 20,306,304 | 256 | 98.3M | 4.84 | 2.9886 | **19.85** | ~2.0 (T4) |
+
+Test loss 2.9881 / perplexity 19.85 — đo **một lần duy nhất** ở cuối, từ
+checkpoint chọn theo validation. Val và test gần như trùng khít (2.9886 vs
+2.9881): không overfit.
+
+Chi phí: 2 giờ trên Kaggle T4 miễn phí.
+
+### Model học được gì
+
+Bài kiểm tra ngữ pháp — model chấm điểm câu đúng thấp hơn (tốt hơn) câu bị đảo trật tự:
+
+```
+[✓] 2.04 vs 3.88   Hà Nội là thủ đô của Việt Nam.
+[✓] 4.35 vs 7.07   Tôi đi học vào buổi sáng.
+[✓] 4.55 vs 7.09   Học sinh đang làm bài tập.
+                                              → 5/5 đúng
+```
+
+Tokenizer byte-level BPE 16K: **0% `<unk>`**, khôi phục chính xác 100%,
+~3.6 ký tự/token trên tiếng Việt.
+
+### Sinh văn bản
+
+```
+▸ Thành phố Hồ Chí Minh nằm ở
+  vùng Đồng bằng sông Hồng trên núi Đồng bằng sông Hồng.
+
+  Lịch sử
+  Vị trí địa lý
+  Thành phố Hồ Chí Minh thuộc tỉnh Hà Tĩnh. Đây là một trong những
+  địa điểm du lịch đặc biệt quan trọng
+```
+
+Ngữ pháp và dấu tiếng Việt chuẩn, tự sinh đúng cấu trúc mục của Wikipedia
+(`Lịch sử`, `Vị trí địa lý`, `Tham khảo`). Nhưng **địa danh, tên riêng và
+sự kiện đều là bịa** — "TP.HCM thuộc tỉnh Hà Tĩnh" là sai hoàn toàn.
+
+Đó là điều phải xảy ra ở 20M tham số với 4.84 token/tham số. Model học được
+*hình thức* của tiếng Việt Wikipedia, không học được *nội dung*. Perplexity
+thấp đo khả năng đoán token kế tiếp, không đo tính đúng đắn của thông tin.
+**Đừng dùng output làm nguồn tin.**
+
+Chạy thử: `python scripts/demo.py` · Chat: `python scripts/chat.py`
+
+---
+
 
 ## 🏗️ Kiến trúc & Pipeline tổng quan
 
@@ -168,21 +219,40 @@ Chi tiết và các cạm bẫy khác: [`scripts/kaggle/README.md`](scripts/kagg
 
 ---
 
-### 5. Sinh Văn bản (Text Generation)
+### 5. Sinh Văn bản & Demo
 
-Sử dụng checkpoint tốt nhất (`checkpoint_best.pt`) để sinh văn bản tiếng Việt:
+**Chat tương tác** — gõ một câu tiếng Việt, model viết tiếp:
+
+```powershell
+python scripts/chat.py
+```
+
+Lệnh trong phiên: `/temp 0.9` đổi nhiệt độ, `/len 200` đổi độ dài, `/quit` thoát.
+Sinh một lần rồi thoát: `python scripts/chat.py --prompt "Hà Nội là"`.
+
+**Demo tổng hợp** — trình bày năng lực đo được của model:
+
+```powershell
+python scripts/demo.py
+```
+
+In ra kiến trúc, chất lượng tokenizer, bài kiểm tra phân biệt ngữ pháp
+đúng/sai, ví dụ sinh văn bản, và đường cong perplexity.
+
+**Gọi trực tiếp module:**
 
 ```powershell
 $env:PYTHONPATH="$PWD/src"
 python -m minivigpt.generate `
-  --checkpoint artifacts/local/checkpoint_best.pt `
-  --tokenizer artifacts/local/tokenizer.json `
+  --checkpoint artifacts/kaggle_run/checkpoint_best.pt `
+  --tokenizer artifacts/kaggle_run/tokenizer.json `
   --prompt "Trí tuệ nhân tạo" `
-  --max-new-tokens 120 `
-  --temperature 0.9 `
-  --top-k 50 `
-  --top-p 0.95
+  --max-new-tokens 120 --temperature 0.8 --top-k 50 --top-p 0.95
 ```
+
+> **Lưu ý:** đây là base model pretrain, không phải trợ lý hỏi-đáp. Nó *viết tiếp*
+> văn bản chứ không *trả lời câu hỏi*. Ngữ pháp và văn phong tiếng Việt chuẩn,
+> nhưng **tên riêng, ngày tháng và sự kiện đều là bịa** — không dùng làm nguồn tin.
 
 ---
 
@@ -192,6 +262,7 @@ python -m minivigpt.generate `
 MiniViGPT/
 ├── configs/                  # Các file cấu hình YAML (20M, Debug)
 │   ├── minivigpt_20m.yaml
+│   ├── minivigpt_20m_chinchilla.yaml  # 33k bước, ngữ cảnh 512
 │   └── minivigpt_debug.yaml
 ├── docs/                     # Tài liệu lý thuyết, kiến trúc & báo cáo
 │   ├── THEORY_PROVENANCE.md
@@ -208,6 +279,8 @@ MiniViGPT/
 │   └── 00_model_smoke_test.ipynb
 ├── scripts/                  # Bộ công cụ tự động hóa & CLI
 │   ├── prepare_dataset.py     # Tải & tiền xử lý dataset local
+│   ├── chat.py                # Chat tương tác với checkpoint đã train
+│   ├── demo.py                # Demo năng lực model (ngữ pháp, tokenizer, ppl)
 │   ├── estimate_training_budget.py
 │   ├── verify_repo.py
 │   ├── kaggle_status.ps1
@@ -224,6 +297,8 @@ MiniViGPT/
 │   ├── data.py               # Hugging Face Streaming & Binary Packing
 │   ├── train.py              # Vòng lặp huấn luyện, AMP, validation & test
 │   └── generate.py           # Thuật toán lấy mẫu sinh chuỗi văn bản
+├── results/                  # Số liệu các lần train (commit được)
+│   └── run_20m_8k/
 ├── tests/                    # Pytest unit tests cho toàn bộ pipeline
 ├── pyproject.toml
 ├── requirements.txt

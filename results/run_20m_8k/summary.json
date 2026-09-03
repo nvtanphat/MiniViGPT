@@ -1,0 +1,12 @@
+{
+  "best_step": 7999,
+  "best_val_loss": 2.9885618766148885,
+  "best_val_perplexity": 19.857104980463536,
+  "test_loss": 2.9880873489379884,
+  "test_perplexity": 19.84768446989047,
+  "parameters": 20306304,
+  "tokens_per_step": 12288,
+  "planned_training_tokens": 98304000,
+  "planned_tokens_per_parameter": 4.841058225071387,
+  "precision": "bf16"
+}

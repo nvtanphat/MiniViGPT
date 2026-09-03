@@ -1,7 +1,7 @@
 {
   "id": "phtnguyn1ytj/minivigpt-train",
   "title": "MiniViGPT Train",
-  "code_file": "minivigpt.ipynb",
+  "code_file": "minivigpt_train.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
