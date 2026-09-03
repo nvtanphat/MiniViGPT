@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Dataset: UVW-2026](https://img.shields.io/badge/Dataset-UVW--2026-green.svg)](https://huggingface.co/datasets/undertheseanlp/UVW-2026)
 
-**MiniViGPT** là repository giáo dục và thực nghiệm reproducible để tự xây dựng, huấn luyện (pretrain) từ đầu một mô hình ngôn ngữ **Decoder-only Language Model (LLM)** trên dữ liệu tiếng Việt sử dụng PyTorch và Kaggle CLI.
+**MiniViGPT** là repository giáo dục và thực nghiệm reproducible để tự xây dựng, huấn luyện (pretrain) từ đầu một mô hình ngôn ngữ **Decoder-only Language Model (LLM)** trên dữ liệu tiếng Việt sử dụng PyTorch.
 
 Mục tiêu dự án là giúp lập trình viên và nhà nghiên cứu hiểu sâu toàn bộ đường ống (pipeline) huấn luyện LLM pretraining từ con số 0. Dự án không tuyên bố kiến trúc mới hay mô hình SOTA, mà tập trung vào tính minh bạch, chính xác về mặt lý thuyết và khả năng tái lập (reproducibility).
 
@@ -123,7 +123,7 @@ python -m minivigpt.train --config configs/minivigpt_debug.yaml
 
 ### 4. Huấn luyện GPU trên Kaggle T4
 
-Repository hỗ trợ đẩy tiến trình training lên Kaggle GPU T4 miễn phí thông qua Kaggle CLI.
+Repository hỗ trợ đẩy tiến trình training lên Kaggle GPU T4 miễn phí.
 
 #### 🔑 Đăng nhập Kaggle API:
 ```powershell
@@ -205,7 +205,7 @@ MiniViGPT/
 │   └── 00_model_smoke_test.ipynb
 ├── scripts/                  # Bộ công cụ tự động hóa & CLI
 │   ├── prepare_dataset.py     # Tải & tiền xử lý dataset local
-│   ├── build_kaggle_bundle.py# Tạo bundle cho Kaggle CLI
+│   ├── build_kaggle_bundle.py# Tạo bundle cho Kaggle
 │   ├── estimate_training_budget.py
 │   ├── verify_repo.py
 │   ├── kaggle_push.ps1
@@ -239,7 +239,7 @@ Repository kèm theo khóa học 10 ngày chi tiết tại [`docs/course/README.
 * **Day 4**: Ghép Cấu trúc Transformer Decoder (MiniViGPT)
 * **Day 5**: UVW-2026 Dataset & Vietnamese Byte-BPE Tokenizer
 * **Day 6**: Training Methodology, Loss & Deterministic Checkpoint
-* **Day 7**: Tích hợp Kaggle CLI & Huấn luyện GPU T4
+* **Day 7**: Tích hợp Kaggle & Huấn luyện GPU T4
 * **Day 9**: Thiết kế Ablation Experiments & Protocol Research
 * **Day 10**: Reproduce, Benchmark & Publish Repository
 
