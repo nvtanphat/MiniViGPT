@@ -7,10 +7,10 @@
 
 **MiniViGPT** là repository giáo dục và thực nghiệm reproducible để tự xây dựng, huấn luyện (pretrain) từ đầu một mô hình ngôn ngữ **Decoder-only Language Model (LLM)** trên dữ liệu tiếng Việt sử dụng PyTorch và Kaggle CLI.
 
-> [!NOTE]
-> **Mục tiêu dự án**: Giúp lập trình viên và nhà nghiên cứu hiểu sâu toàn bộ đường ống (pipeline) huấn luyện LLM pretraining từ con số 0. Dự án **không** tuyên bố kiến trúc mới hay mô hình SOTA, mà tập trung vào tính minh bạch, chính xác về mặt lý thuyết và khả năng tái lập (reproducibility).
+Mục tiêu dự án là giúp lập trình viên và nhà nghiên cứu hiểu sâu toàn bộ đường ống (pipeline) huấn luyện LLM pretraining từ con số 0. Dự án không tuyên bố kiến trúc mới hay mô hình SOTA, mà tập trung vào tính minh bạch, chính xác về mặt lý thuyết và khả năng tái lập (reproducibility).
 
 ---
+
 
 ## 🏗️ Kiến trúc & Pipeline tổng quan
 
@@ -233,16 +233,17 @@ MiniViGPT/
 
 Repository kèm theo khóa học 10 ngày chi tiết tại [`docs/course/README.md`](docs/course/README.md). Mỗi ngày thực hành tương ứng trực tiếp với code và unit test trong repo:
 
-* **Day 1**: Byte-level BPE Tokenizer từ con số 0
-* **Day 2**: Pre-RMSNorm & Rotary Position Embedding (RoPE)
-* **Day 3**: Multi-Head Causal Self-Attention & SDPA
-* **Day 4**: SwiGLU FFN & Residual Initialization Scaling
-* **Day 5**: Đóng gói Cấu trúc Transformer Decoder & Weight Tying
-* **Day 6**: Binary Token Dataset Streaming & Document EOS Packing
-* **Day 7**: AdamW Optimizer, Cosine Scheduler & Mixed Precision (AMP)
-* **Day 8**: Kaggle CLI Integration & Deterministic Resumption
-* **Day 9**: Validation Protocol, Test Evaluation & Perplexity
-* **Day 10**: Autoregressive Text Generation (Greedy, Temp, Top-k, Top-p)
+* **Day 1**: Token, Embedding & Next-Token Objective
+* **Day 2**: Q/K/V & Causal Self-Attention
+* **Day 3**: Pre-RMSNorm, RoPE & SwiGLU FFN
+* **Day 4**: Ghép Cấu trúc Transformer Decoder (MiniViGPT)
+* **Day 5**: UVW-2026 Dataset & Vietnamese Byte-BPE Tokenizer
+* **Day 6**: Training Methodology, Loss & Deterministic Checkpoint
+* **Day 7**: Tích hợp Kaggle CLI & Huấn luyện GPU T4
+* **Day 8**: Generation, Sampling (Greedy, Temp, Top-k, Top-p) & Perplexity Evaluation
+* **Day 9**: Thiết kế Ablation Experiments & Protocol Research
+* **Day 10**: Reproduce, Benchmark & Publish Repository
+
 
 ---
 
