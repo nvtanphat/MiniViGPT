@@ -49,7 +49,7 @@ tokenizer:
 training:
   # Effective tokens/update = 12 * 4 * 256 = 12,288.
   # 8,000 updates = 98,304,000 training-token presentations (~4.8 tokens/parameter).
-  # This is intentionally an educational T4 budget, NOT compute-optimal pretraining.
+  # This is intentionally a baseline T4 budget, NOT compute-optimal pretraining.
   max_steps: 8000
   batch_size: 12
   grad_accum_steps: 4

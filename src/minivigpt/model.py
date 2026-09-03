@@ -167,7 +167,7 @@ class TransformerBlock(nn.Module):
 
 
 class MiniViGPT(nn.Module):
-    """Educational decoder-only language model for Vietnamese causal LM pretraining."""
+    """Decoder-only language model for Vietnamese causal LM pretraining."""
 
     def __init__(self, config: MiniViGPTConfig) -> None:
         super().__init__()

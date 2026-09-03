@@ -2,7 +2,7 @@
 
 ## Kết luận review
 
-v0.1 có architecture direction đúng nhưng còn ở mức **good prototype**. v0.2 nâng thành **reference-quality educational baseline** bằng cách sửa các điểm methodology có thể làm kết quả khó diễn giải hoặc resume không đáng tin.
+v0.1 có architecture direction đúng nhưng còn ở mức **good prototype**. v0.2 nâng thành **reference-quality baseline** bằng cách sửa các điểm methodology có thể làm kết quả khó diễn giải hoặc resume không đáng tin.
 
 ## Các thay đổi quan trọng
 
@@ -35,4 +35,4 @@ v0.1 có architecture direction đúng nhưng còn ở mức **good prototype**.
 - instruction tuning
 - RAG/API
 
-Lý do: đây là baseline pretraining from scratch. Các phần trên nên được thêm sau khi baseline được reproduce, không nên làm code phình to trước khi người học hiểu causal LM core.
+Lý do: đây là baseline pretraining from scratch. Các phần trên nên được thêm sau khi baseline được reproduce, không nên làm code phình toàn bộ trước khi hiểu causal LM core.

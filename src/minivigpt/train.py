@@ -186,28 +186,34 @@ def _adopt_prepared_data(config: dict, output_dir: Path) -> None:
     if input_root.is_dir():
         candidates.extend(sorted(p.parent for p in input_root.glob("*/train.bin")))
 
-    wanted = ("tokenizer.json", "train.bin", "validation.bin", "test.bin")
+    splits = ("train.bin", "validation.bin", "test.bin")
+
+    def _pairs(base: Path) -> list[tuple[Path, Path]]:
+        """Every file a complete corpus needs, as (source, destination)."""
+        items = [(base / "tokenizer.json", output_dir / "tokenizer.json")]
+        for name in splits:
+            items.append((base / name, output_dir / name))
+            meta = name + ".json"
+            items.append((base / meta, output_dir / meta))
+        return items
+
     for source in candidates:
         if not source.is_dir() or source.resolve() == output_dir.resolve():
             continue
-        if not (source / "train.bin").exists():
+        pairs = _pairs(source)
+        # Adopt a source only if it can supply a complete corpus. A partial copy
+        # would leave a .bin without its sidecar .json and silently fall through
+        # to re-streaming the dataset.
+        if not all(src.exists() for src, _ in pairs):
             continue
-        adopted = []
-        for name in wanted:
-            src_file = source / name
-            dst_file = output_dir / name
-            if dst_file.exists() or not src_file.exists():
-                continue
-            if name.endswith(".bin"):
-                meta = src_file.with_suffix(src_file.suffix + ".json")
-                if not meta.exists():
-                    continue
-                shutil.copy2(meta, dst_file.with_suffix(dst_file.suffix + ".json"))
-            shutil.copy2(src_file, dst_file)
-            adopted.append(name)
-        if adopted:
-            print(f"[data] reusing prepared corpus from {source}: {', '.join(adopted)}")
+        if all(dst.exists() for _, dst in pairs):
+            print(f"[data] prepared corpus already present in {output_dir}")
             return
+        for src, dst in pairs:
+            if not dst.exists():
+                shutil.copy2(src, dst)
+        print(f"[data] reusing prepared corpus from {source}")
+        return
 
 
 def prepare_data(config: dict, output_dir: Path, resume: str | None = None) -> tuple[Path, Path, Path, Path]:

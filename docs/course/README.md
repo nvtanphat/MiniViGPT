@@ -10,8 +10,8 @@
 | 4 | Ghép full MiniViGPT | `MiniViGPT`, config | tính đúng parameter budget |
 | 5 | UVW-2026 + Vietnamese BPE | `data.py`, `tokenizer.py` | tạo tokenizer + train/val/test token stream |
 | 6 | Training methodology | `train.py` | loss giảm + deterministic val + checkpoint |
-| 7 | Kaggle CLI | `scripts/`, `kaggle_entry.py` | debug job pass trên T4 |
 | 9 | Ablation như research | configs + `EXPERIMENT_PROTOCOL.md` | thiết kế experiment fair |
+
 | 10 | Reproduce + publish | toàn repo | README/model card/result table có thể audit |
 
 

@@ -18,7 +18,7 @@ Sau Kaggle run, lưu `summary.json`, `metrics.jsonl`, tokenizer và config.
 
 Nên mô tả:
 
-> Educational modern decoder-only LM trained from scratch on Vietnamese Wikipedia, designed for reproducible Kaggle T4 experiments.
+> Modern decoder-only LM trained from scratch on Vietnamese Wikipedia, designed for reproducible Kaggle T4 experiments.
 
 Không viết “first Vietnamese LLM”, “SOTA”, “production-ready” nếu chưa có evidence.
 

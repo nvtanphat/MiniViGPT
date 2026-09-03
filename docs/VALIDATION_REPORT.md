@@ -22,7 +22,7 @@ For the default 20M config:
 - planned token presentations: 98,304,000
 - planned token presentations / parameter: about 4.84
 
-`token presentations` are sampled training windows and may repeat; they are **not** unique corpus tokens. This budget is intentionally an educational Kaggle budget, not a claim of compute-optimal pretraining.
+`token presentations` are sampled training windows and may repeat; they are **not** unique corpus tokens. This budget is intentionally a baseline Kaggle budget, not a claim of compute-optimal pretraining.
 
 ## What was not executed here
 

@@ -2,7 +2,8 @@
 
 Tài liệu này trả lời câu hỏi quan trọng nhất của repo: **mỗi kỹ thuật trong MiniViGPT đến từ đâu, đã được dùng ở đâu, và repo này thay đổi gì?**
 
-MiniViGPT là một **educational implementation**, không tuyên bố kiến trúc mới. Mục tiêu là ghép các thành phần đã được công bố và kiểm chứng thành một decoder-only Vietnamese language model đủ nhỏ để một người học có thể đọc hết code và pretrain trên Kaggle T4.
+MiniViGPT là một **reference implementation**, không tuyên bố kiến trúc mới. Mục tiêu là ghép các thành phần đã được công bố và kiểm chứng thành một decoder-only Vietnamese language model đủ nhỏ để có thể đọc hết code và pretrain trên Kaggle T4.
+
 
 ## Bảng nguồn gốc kỹ thuật
 
@@ -43,7 +44,7 @@ nanoGPT dùng GPT-2-like block với learned positional embedding và GELU. Mini
 
 ## Vì sao dùng Byte-level BPE cho tiếng Việt?
 
-Byte-level BPE có ba lợi ích giáo dục/thực dụng:
+Byte-level BPE có ba lợi ích thực dụng:
 
 1. Vocabulary hữu hạn và bao phủ mọi UTF-8 input nhờ byte alphabet.
 2. Không bắt buộc word segmentation tiếng Việt trước khi train.
