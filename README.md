@@ -240,9 +240,9 @@ Repository kèm theo khóa học 10 ngày chi tiết tại [`docs/course/README.
 * **Day 5**: UVW-2026 Dataset & Vietnamese Byte-BPE Tokenizer
 * **Day 6**: Training Methodology, Loss & Deterministic Checkpoint
 * **Day 7**: Tích hợp Kaggle CLI & Huấn luyện GPU T4
-* **Day 8**: Generation, Sampling (Greedy, Temp, Top-k, Top-p) & Perplexity Evaluation
 * **Day 9**: Thiết kế Ablation Experiments & Protocol Research
 * **Day 10**: Reproduce, Benchmark & Publish Repository
+
 
 
 ---
