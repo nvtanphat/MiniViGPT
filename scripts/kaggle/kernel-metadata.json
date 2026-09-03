@@ -1,0 +1,18 @@
+{
+  "id": "phtnguyn1ytj/minivigpt-train",
+  "title": "MiniViGPT Train",
+  "code_file": "minivigpt.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "phtnguyn1ytj/minivigpt-src",
+    "phtnguyn1ytj/minivigpt-vi-tokens-16k"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

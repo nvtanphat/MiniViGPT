@@ -131,37 +131,40 @@ pip install -U kaggle
 kaggle auth login
 ```
 
-#### 🐞 Bước 1: Run Debug Kiểm thử trước
+#### 📦 Bước 1: Đẩy source và corpus thành Kaggle Dataset
+Notebook chạy trên Kaggle nạp code từ một dataset, và corpus đã tokenize từ một
+dataset khác — nhờ vậy mỗi lần chạy bỏ qua được ~30 phút stream + tokenize.
+
 ```powershell
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_KAGGLE_USERNAME" `
-  -Slug "minivigpt-debug" `
-  -Config "configs/minivigpt_debug.yaml"
+# source + config
+New-Item -ItemType Directory -Force $env:TEMP\mvg-src | Out-Null
+Copy-Item -Recurse -Force src\minivigpt $env:TEMP\mvg-srcCopy-Item configs\minivigpt_20m.yaml $env:TEMP\mvg-src\config.yaml
+Remove-Item -Recurse -Force $env:TEMP\mvg-src\minivigpt\__pycache__ -EA SilentlyContinue
+# tạo dataset-metadata.json với id "<user>/minivigpt-src", rồi:
+kaggle datasets create -p $env:TEMP\mvg-src --dir-mode zip
+
+# corpus đã tokenize (chỉ cần một lần, ~239 MB)
+kaggle datasets create -p artifacts\local
 ```
 
-Kiểm tra trạng thái & Tải kết quả Debug:
+`--dir-mode zip` là bắt buộc — thiếu nó CLI in `Skipping folder: minivigpt` và
+không upload gì ngoài các file rời.
+
+#### 🚀 Bước 2: Push notebook và train
 ```powershell
-.\scripts\kaggle_status.ps1 -KaggleUsername "YOUR_KAGGLE_USERNAME" -Slug "minivigpt-debug"
-.\scripts\kaggle_download.ps1 -KaggleUsername "YOUR_KAGGLE_USERNAME" -Slug "minivigpt-debug"
+kaggle kernels push -p scripts\kaggle --accelerator NvidiaTeslaT4
+kaggle kernels status <user>/minivigpt-train
 ```
 
-#### 🚀 Bước 2: Train Model 20M chính thức
-```powershell
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_KAGGLE_USERNAME" `
-  -Slug "minivigpt-20m" `
-  -Config "configs/minivigpt_20m.yaml"
-```
+`--accelerator` (và `machine_shape` trong `kernel-metadata.json`) là bắt buộc:
+nếu để Kaggle tự chọn, bạn có thể nhận P100 (`sm_60`) mà bản PyTorch trong image
+Kaggle không còn hỗ trợ, và mọi phép tính CUDA sẽ lỗi ngay.
 
-#### 🔄 Bước 3: Resume Training trên Kaggle
-Đưa `checkpoint_latest.pt` của lần chạy trước vào private Kaggle Dataset và đính kèm khi push:
-```powershell
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_KAGGLE_USERNAME" `
-  -Slug "minivigpt-20m-resume" `
-  -Config "configs/minivigpt_20m.yaml" `
-  -DatasetSource "YOUR_KAGGLE_USERNAME/minivigpt-resume"
-```
+#### 🔄 Bước 3: Resume Training
+Kaggle giới hạn 9 giờ mỗi session. Lưu output lần chạy trước thành dataset rồi
+đính kèm — notebook tự tìm `checkpoint_latest.pt` dưới `/kaggle/input` và tiếp tục.
+
+Chi tiết và các cạm bẫy khác: [`scripts/kaggle/README.md`](scripts/kaggle/README.md).
 
 ---
 
@@ -205,12 +208,14 @@ MiniViGPT/
 │   └── 00_model_smoke_test.ipynb
 ├── scripts/                  # Bộ công cụ tự động hóa & CLI
 │   ├── prepare_dataset.py     # Tải & tiền xử lý dataset local
-│   ├── build_kaggle_bundle.py# Tạo bundle cho Kaggle
 │   ├── estimate_training_budget.py
 │   ├── verify_repo.py
-│   ├── kaggle_push.ps1
 │   ├── kaggle_status.ps1
-│   └── kaggle_download.ps1
+│   ├── kaggle_download.ps1
+│   └── kaggle/                # Notebook + metadata để train trên Kaggle GPU
+│       ├── minivigpt_train.ipynb
+│       ├── kernel-metadata.json
+│       └── README.md
 ├── src/minivigpt/            # Mã nguồn chính của mô hình
 │   ├── config.py             # Dataclass cấu hình mô hình
 │   ├── model.py              # Định nghĩa Transformer Decoder
@@ -218,8 +223,7 @@ MiniViGPT/
 │   ├── tokenizer_eval.py     # Đánh giá tỷ lệ nén tokenizer
 │   ├── data.py               # Hugging Face Streaming & Binary Packing
 │   ├── train.py              # Vòng lặp huấn luyện, AMP, validation & test
-│   ├── generate.py           # Thuật toán lấy mẫu sinh chuỗi văn bản
-│   └── kaggle_entry.py       # Entrypoint chạy tự động trên Kaggle GPU
+│   └── generate.py           # Thuật toán lấy mẫu sinh chuỗi văn bản
 ├── tests/                    # Pytest unit tests cho toàn bộ pipeline
 ├── pyproject.toml
 ├── requirements.txt

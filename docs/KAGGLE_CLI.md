@@ -2,107 +2,60 @@
 
 ## 1. Yêu cầu local
 
-Kaggle CLI hiện yêu cầu Python 3.11+.
+Kaggle CLI yêu cầu Python 3.11+.
 
 ```powershell
-py --version
 py -m pip install -U kaggle
 kaggle --version
-```
-
-Authentication hiện hỗ trợ OAuth:
-
-```powershell
 kaggle auth login
 ```
 
-Bạn cũng có thể dùng credential/token theo tài liệu Kaggle chính thức.
+Bạn cũng có thể dùng credential/token theo tài liệu Kaggle chính thức
+(`~/.kaggle/kaggle.json`, hoặc biến môi trường `KAGGLE_USERNAME`/`KAGGLE_KEY`).
 
-## 2. Luôn chạy debug trước
+## 2. Quy trình train
 
-```powershell
-cd MiniViGPT
+Quy trình đầy đủ — đẩy source và corpus thành dataset, push notebook, resume,
+cùng các cạm bẫy của Kaggle — nằm ở [`scripts/kaggle/README.md`](../scripts/kaggle/README.md).
 
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_USERNAME" `
-  -Slug "minivigpt-debug" `
-  -Config "configs/minivigpt_debug.yaml"
-```
-
-Script tạo `dist/kaggle/` gồm:
-
-- `train.py`
-- `config.yaml`
-- package `minivigpt/`
-- `kernel-metadata.json`
-
-Metadata bật GPU, Internet và `NvidiaTeslaT4` theo mặc định.
-
-## 3. Check status
+Tóm tắt:
 
 ```powershell
-.\scripts\kaggle_status.ps1 `
-  -KaggleUsername "YOUR_USERNAME" `
-  -Slug "minivigpt-debug"
+# source + config (cần --dir-mode zip, nếu không thư mục sẽ bị bỏ qua)
+kaggle datasets create -p <thư-mục-source> --dir-mode zip
+
+# corpus đã tokenize, chỉ cần một lần
+kaggle datasets create -p artifacts\local
+
+# notebook — phải chỉ định accelerator, xem lưu ý bên dưới
+kaggle kernels push -p scripts\kaggle --accelerator NvidiaTeslaT4
+kaggle kernels status <user>/minivigpt-train
 ```
 
-## 4. Download output
+## 3. Theo dõi và tải kết quả
 
 ```powershell
-.\scripts\kaggle_download.ps1 `
-  -KaggleUsername "YOUR_USERNAME" `
-  -Slug "minivigpt-debug"
+.\scripts\kaggle_status.ps1   -KaggleUsername "<user>" -Slug "minivigpt-train"
+.\scripts\kaggle_download.ps1 -KaggleUsername "<user>" -Slug "minivigpt-train"
 ```
 
-Kiểm tra tối thiểu:
+Kaggle chỉ cho tải output sau khi kernel kết thúc; trong lúc chạy chỉ xem được
+trạng thái. Log của một lần chạy lỗi vẫn tải về được và là nơi đầu tiên nên xem.
 
-- `summary.json` tồn tại
-- `checkpoint_best.pt` tồn tại
-- `checkpoint_latest.pt` tồn tại
-- `tokenizer.json` tồn tại
-- `metrics.jsonl` có train + val records
-- `sample.txt` generate được
+## 4. Resume
 
-## 5. Train config 20M
+Kaggle giới hạn 9 giờ mỗi session. Lưu output lần chạy trước thành một private
+dataset rồi đính kèm vào lần chạy sau — notebook tự tìm `checkpoint_latest.pt`
+dưới `/kaggle/input` (đệ quy) và tiếp tục từ đó. Checkpoint mang theo cả
+optimizer state, RNG state và tokenizer nên quỹ đạo train được nối liền mạch.
 
-```powershell
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_USERNAME" `
-  -Slug "minivigpt-20m" `
-  -Config "configs/minivigpt_20m.yaml"
-```
+## 5. Lưu ý quan trọng
 
-Không thay nhiều hyperparameter cùng lúc ngay run đầu tiên.
+**Luôn chỉ định GPU.** Thiếu `machine_shape`/`--accelerator`, Kaggle có thể cấp
+P100 (`sm_60`) mà bản PyTorch trong image Kaggle không còn hỗ trợ — mọi phép
+tính CUDA sẽ lỗi `no kernel image is available for execution on the device`.
 
-## 6. Resume qua Kaggle Dataset source
+**Dataset được mount lồng nhau** theo dạng `/kaggle/input/datasets/<user>/<slug>/`,
+không phải mỗi dataset một thư mục ở cấp một.
 
-Kaggle kernel có thể attach dataset sources. Workflow an toàn:
-
-1. Download output của run trước.
-2. Tạo một **private Kaggle Dataset** chứa `checkpoint_latest.pt` (và có thể cả tokenizer/config).
-3. Attach dataset đó vào kernel tiếp theo.
-4. `kaggle_entry.py` tìm `**/checkpoint_latest.pt` dưới `/kaggle/input` và auto-resume.
-
-Khi đã có dataset source `YOUR_USERNAME/minivigpt-resume`, push:
-
-```powershell
-.\scripts\kaggle_push.ps1 `
-  -KaggleUsername "YOUR_USERNAME" `
-  -Slug "minivigpt-20m-resume" `
-  -Config "configs/minivigpt_20m.yaml" `
-  -DatasetSource "YOUR_USERNAME/minivigpt-resume"
-```
-
-Nếu attach nhiều dataset có `checkpoint_latest.pt`, entry script sẽ liệt kê và chọn path lexicographically last. Tốt nhất mỗi resume job chỉ attach một checkpoint dataset.
-
-## 7. Vì sao không hard-code `/kaggle/input/...`?
-
-Slug dataset của bạn chưa biết trước. Auto-discovery giúp repo portable. Nhưng checkpoint vẫn bị kiểm config model trước khi load.
-
-## 8. T4 vs P100
-
-Repo mặc định T4. Kaggle CLI metadata hiện hỗ trợ `NvidiaTeslaT4`; tài liệu hiện tại còn cảnh báo default Kaggle image có thể không chạy CUDA op đúng trên P100 do build compatibility, nên T4 là lựa chọn an toàn cho repo này.
-
-## 9. Internet
-
-`enable_internet=true` vì Hugging Face dataset/tokenizer dependencies được tải trong Kaggle job. Nếu muốn hoàn toàn offline, bạn phải đóng gói dataset snapshot + Python wheels thành Kaggle Dataset; đó là một experiment reproducibility khác.
+**File push phải thuần ASCII** — CLI đọc bằng cp1252 và sẽ lỗi với tiếng Việt.

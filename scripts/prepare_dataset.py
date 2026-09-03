@@ -2,17 +2,14 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 
 # Allow running this script directly from a source checkout (no editable install).
 _SRC = Path(__file__).resolve().parents[1] / "src"
 if _SRC.is_dir() and str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
-import sys
 
 import yaml
-
-# Ensure src is in python path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from minivigpt.train import prepare_data
 

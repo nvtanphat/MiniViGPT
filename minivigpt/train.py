@@ -18,6 +18,8 @@ from .data import BinaryTokenDataset, iter_hf_texts, write_token_binary
 from .model import MiniViGPT
 
 
+
+
 def load_checkpoint_file(path: str | Path, map_location):
     """Load our full-state checkpoint. Only load checkpoints you trust.
 
@@ -182,9 +184,7 @@ def _adopt_prepared_data(config: dict, output_dir: Path) -> None:
         candidates.append(Path(explicit))
     input_root = Path("/kaggle/input")
     if input_root.is_dir():
-        # Kaggle nests attached datasets as /kaggle/input/datasets/<user>/<slug>/,
-        # so search by content rather than assuming a fixed depth.
-        candidates.extend(sorted(p.parent for p in input_root.rglob("train.bin")))
+        candidates.extend(sorted(p.parent for p in input_root.glob("*/train.bin")))
 
     splits = ("train.bin", "validation.bin", "test.bin")
 
