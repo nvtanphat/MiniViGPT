@@ -1,4 +1,4 @@
-# Day 9 — Thiết kế Ablation như một Research Engineer
+# Day 7 — Thiết kế Ablation như một Research Engineer
 
 ## Mục tiêu
 
@@ -52,6 +52,6 @@ Tạo table trước khi chạy để tránh cherry-pick metric:
 | Run | Change | Params | Train tokens | Val loss | Test loss | Time |
 |---|---|---:|---:|---:|---:|---:|
 
-## Checkpoint Day 9
+## Checkpoint Day 7
 
 Bạn pass khi có thể phản biện câu: “Model B tốt hơn vì val PPL thấp hơn” bằng cách hỏi tokenizer/compute/params có công bằng không.

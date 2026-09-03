@@ -1,4 +1,4 @@
-# Day 10 — Reproduce, Audit, Publish
+# Day 8 — Reproduce, Audit, Publish
 
 ## Mục tiêu
 
@@ -58,7 +58,7 @@ Bắt buộc ghi:
 
 Code MIT. UVW-2026 data CC BY-SA 4.0. Khi redistributing data-derived artifacts/weights, đọc và tuân thủ điều khoản nguồn thay vì giả định code license áp dụng cho dataset.
 
-## 7. Sau Day 10
+## 7. Sau Day 8
 
 Khi baseline này ổn mới sang Phase 2:
 

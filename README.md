@@ -239,8 +239,8 @@ Repository kèm theo hướng dẫn thực hành chi tiết tại [`docs/course/
 * **Day 4**: Ghép Cấu trúc Transformer Decoder (MiniViGPT)
 * **Day 5**: UVW-2026 Dataset & Vietnamese Byte-BPE Tokenizer
 * **Day 6**: Training Methodology, Loss & Deterministic Checkpoint
-* **Day 9**: Thiết kế Ablation Experiments & Protocol Research
-* **Day 10**: Reproduce, Benchmark & Publish Repository
+* **Day 7**: Thiết kế Ablation Experiments & Protocol Research
+* **Day 8**: Reproduce, Benchmark & Publish Repository
 
 
 
