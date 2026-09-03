@@ -1,0 +1,83 @@
+seed: 42
+output_dir: /kaggle/working/minivigpt_outputs
+
+model:
+  vocab_size: 16000
+  max_seq_len: 256
+  dim: 384
+  n_layers: 8
+  n_heads: 6
+  hidden_dim: null
+  ffn_multiple_of: 256
+  dropout: 0.0
+  rope_theta: 10000.0
+  rms_eps: 1.0e-6
+  tie_embeddings: true
+  init_std: 0.02
+  scaled_residual_init: true
+  # manual = readable reference; sdpa = same semantics with PyTorch fused attention.
+  attention_impl: sdpa
+
+dataset:
+  name: undertheseanlp/UVW-2026
+  # Pin the dataset revision so a future upstream change cannot silently alter a run.
+  revision: a0a79294e4568137e25828bb3f2a4cde8546e1fb
+  text_column: content
+  quality_column: quality_score
+  category_column: main_category
+  train_split: train
+  validation_split: validation
+  test_split: test
+  min_chars: 100
+  min_quality_score: 5
+  tokenizer_articles: 50000
+  train_articles: 150000
+  validation_articles: 8000
+  test_articles: 8000
+  shuffle_buffer: 20000
+  deduplicate_exact: true
+  exclude_categories_contains:
+    - "mục nội bộ Wikimedia"
+    - "trang định hướng Wikimedia"
+  append_eos: true
+
+tokenizer:
+  vocab_size: 16000
+  min_frequency: 2
+  special_tokens: [<pad>, <unk>, <eos>]
+
+training:
+  # Effective tokens/update = 12 * 4 * 256 = 12,288.
+  # 8,000 updates = 98,304,000 training-token presentations (~4.8 tokens/parameter).
+  # This is intentionally an educational T4 budget, NOT compute-optimal pretraining.
+  max_steps: 8000
+  batch_size: 12
+  grad_accum_steps: 4
+  learning_rate: 3.0e-4
+  min_lr: 3.0e-5
+  warmup_steps: 200
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  adam_eps: 1.0e-8
+  grad_clip: 1.0
+  eval_interval: 400
+  eval_batches: 30
+  test_batches: 50
+  eval_seed: 12345
+  test_seed: 54321
+  save_interval: 400
+  log_interval: 20
+  precision: auto
+  compile: false
+
+resume:
+  auto_from_kaggle_input: true
+  checkpoint_glob: "**/checkpoint_latest.pt"
+
+sampling:
+  prompt: "Trí tuệ nhân tạo"
+  max_new_tokens: 120
+  temperature: 0.9
+  top_k: 50
+  top_p: 0.95

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+.DS_Store
+artifacts/
+dist/
+*.bin
+*.pt
+*.pth
+*.ckpt
+tokenizer.json
+kaggle.json
+*.log
+

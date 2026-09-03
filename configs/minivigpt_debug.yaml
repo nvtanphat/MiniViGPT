@@ -1,0 +1,78 @@
+seed: 42
+output_dir: /kaggle/working/minivigpt_outputs
+
+model:
+  vocab_size: 4000
+  max_seq_len: 128
+  dim: 128
+  n_layers: 2
+  n_heads: 4
+  hidden_dim: null
+  ffn_multiple_of: 64
+  dropout: 0.0
+  rope_theta: 10000.0
+  rms_eps: 1.0e-6
+  tie_embeddings: true
+  init_std: 0.02
+  scaled_residual_init: true
+  attention_impl: manual
+
+dataset:
+  name: undertheseanlp/UVW-2026
+  revision: a0a79294e4568137e25828bb3f2a4cde8546e1fb
+  text_column: content
+  quality_column: quality_score
+  category_column: main_category
+  train_split: train
+  validation_split: validation
+  test_split: test
+  min_chars: 100
+  min_quality_score: 4
+  tokenizer_articles: 1500
+  train_articles: 3000
+  validation_articles: 400
+  test_articles: 400
+  shuffle_buffer: 2000
+  deduplicate_exact: true
+  exclude_categories_contains:
+    - "mục nội bộ Wikimedia"
+    - "trang định hướng Wikimedia"
+  append_eos: true
+
+tokenizer:
+  vocab_size: 4000
+  min_frequency: 2
+  special_tokens: [<pad>, <unk>, <eos>]
+
+training:
+  max_steps: 100
+  batch_size: 8
+  grad_accum_steps: 2
+  learning_rate: 3.0e-4
+  min_lr: 3.0e-5
+  warmup_steps: 10
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  adam_eps: 1.0e-8
+  grad_clip: 1.0
+  eval_interval: 25
+  eval_batches: 5
+  test_batches: 8
+  eval_seed: 12345
+  test_seed: 54321
+  save_interval: 25
+  log_interval: 5
+  precision: auto
+  compile: false
+
+resume:
+  auto_from_kaggle_input: true
+  checkpoint_glob: "**/checkpoint_latest.pt"
+
+sampling:
+  prompt: "Việt Nam"
+  max_new_tokens: 50
+  temperature: 0.9
+  top_k: 40
+  top_p: 0.95
