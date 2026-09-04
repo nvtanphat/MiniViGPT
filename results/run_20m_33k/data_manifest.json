@@ -1,0 +1,64 @@
+{
+  "dataset": {
+    "append_eos": true,
+    "category_column": "main_category",
+    "deduplicate_exact": true,
+    "exclude_categories_contains": [
+      "mục nội bộ Wikimedia",
+      "trang định hướng Wikimedia"
+    ],
+    "min_chars": 100,
+    "min_quality_score": 5,
+    "name": "undertheseanlp/UVW-2026",
+    "prepared_dir": "/kaggle/input/datasets/phtnguyn1ytj/minivigpt-vi-tokens-16k",
+    "quality_column": "quality_score",
+    "revision": "a0a79294e4568137e25828bb3f2a4cde8546e1fb",
+    "shuffle_buffer": 20000,
+    "test_articles": 8000,
+    "test_split": "test",
+    "text_column": "content",
+    "tokenizer_articles": 50000,
+    "train_articles": 150000,
+    "train_split": "train",
+    "validation_articles": 8000,
+    "validation_split": "validation"
+  },
+  "tokenizer": {
+    "min_frequency": 2,
+    "special_tokens": [
+      "<pad>",
+      "<unk>",
+      "<eos>"
+    ],
+    "vocab_size": 16000
+  },
+  "files": {
+    "train": {
+      "articles": 150000,
+      "tokens": 112120183,
+      "utf8_bytes": 470118954,
+      "bytes_per_token": 4.192991318967077,
+      "vocab_size": 16000,
+      "dtype": "uint16",
+      "sha256": "bae87cbbb894bafc362e8ba6bba329f1779d2145bb820ff259acc2b48c3b09ae"
+    },
+    "validation": {
+      "articles": 8000,
+      "tokens": 6088025,
+      "utf8_bytes": 25715578,
+      "bytes_per_token": 4.223960644051232,
+      "vocab_size": 16000,
+      "dtype": "uint16",
+      "sha256": "9b3eef37d942308777548cb9fb968383114df7544052f6859708f111e2f99649"
+    },
+    "test": {
+      "articles": 8000,
+      "tokens": 6368136,
+      "utf8_bytes": 26606836,
+      "bytes_per_token": 4.17811993964953,
+      "vocab_size": 16000,
+      "dtype": "uint16",
+      "sha256": "fdd2f0026fd17933ee435137fdf4b2bba23f4b70a90b922932e61dfad13b0d11"
+    }
+  }
+}

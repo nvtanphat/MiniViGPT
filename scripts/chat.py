@@ -21,7 +21,7 @@ import torch
 from minivigpt.generate import load_model
 from minivigpt.tokenizer import load_tokenizer, special_token_id
 
-DEFAULT_DIR = Path("artifacts/kaggle_run")
+DEFAULT_DIR = Path("artifacts/kaggle_run_33k")
 
 
 def resolve(explicit: str | None, name: str) -> Path:

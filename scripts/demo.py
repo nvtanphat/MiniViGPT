@@ -22,9 +22,9 @@ import torch
 from minivigpt.generate import load_model
 from minivigpt.tokenizer import load_tokenizer, special_token_id
 
-CKPT = Path("artifacts/kaggle_run/checkpoint_best.pt")
-TOK = Path("artifacts/kaggle_run/tokenizer.json")
-SUMMARY = Path("results/run_20m_8k/summary.json")
+CKPT = Path("artifacts/kaggle_run_33k/checkpoint_best.pt")
+TOK = Path("artifacts/kaggle_run_33k/tokenizer.json")
+SUMMARY = Path("results/run_20m_33k/summary.json")
 
 # Each pair is (fluent, corrupted): same words, broken order or duplication.
 GRAMMAR_PAIRS = [
@@ -112,7 +112,7 @@ def main() -> None:
         print(f"    {text[len(prompt):].strip()[:200]}\n")
 
     rule("5. ĐƯỜNG CONG HUẤN LUYỆN")
-    metrics = Path("results/run_20m_8k/metrics.jsonl")
+    metrics = Path("results/run_20m_33k/metrics.jsonl")
     if metrics.exists():
         evals = [json.loads(l) for l in metrics.read_text(encoding="utf-8").splitlines()]
         evals = [m for m in evals if "val_loss" in m]

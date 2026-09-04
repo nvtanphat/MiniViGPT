@@ -13,24 +13,26 @@ Mục tiêu dự án là giúp lập trình viên và nhà nghiên cứu hiểu 
 
 ## 📊 Kết quả
 
-| Model | Tham số | Ngữ cảnh | Token huấn luyện | tok/param | Val loss | **Perplexity** | GPU-giờ |
+| Run | Tham số | Ngữ cảnh | Token | tok/param | Val ppl | **Test ppl** | GPU-giờ |
 |---|---|---|---|---|---|---|---|
-| `run_20m_8k` | 20,306,304 | 256 | 98.3M | 4.84 | 2.9886 | **19.85** | ~2.0 (T4) |
+| [`run_20m_8k`](results/run_20m_8k/) | 20,306,304 | 256 | 98.3M | 4.84 | 19.86 | **19.85** | ~2.0 |
+| [`run_20m_33k`](results/run_20m_33k/) | 20,306,304 | 512 | 405.5M | 19.97 | 12.95 | **13.98** | ~8.8 |
 
-Test loss 2.9881 / perplexity 19.85 — đo **một lần duy nhất** ở cuối, từ
-checkpoint chọn theo validation. Val và test gần như trùng khít (2.9886 vs
-2.9881): không overfit.
+Chinchilla-optimal (≈20 token/tham số) giảm perplexity **30%**, đổi lại 4,4×
+GPU-giờ. Test đo **một lần duy nhất** ở cuối, từ checkpoint chọn theo validation.
 
-Chi phí: 2 giờ trên Kaggle T4 miễn phí.
+Chạy trên Kaggle T4 miễn phí. Val loss vẫn còn giảm khi kết thúc, nhưng rất
+chậm — ước tính 66.000 bước chỉ được ppl ~11,1, không đáng chi phí.
 
 ### Model học được gì
 
 Bài kiểm tra ngữ pháp — model chấm điểm câu đúng thấp hơn (tốt hơn) câu bị đảo trật tự:
 
 ```
-[✓] 2.04 vs 3.88   Hà Nội là thủ đô của Việt Nam.
-[✓] 4.35 vs 7.07   Tôi đi học vào buổi sáng.
-[✓] 4.55 vs 7.09   Học sinh đang làm bài tập.
+[✓] 2.03 vs 3.91   Hà Nội là thủ đô của Việt Nam.
+[✓] 4.37 vs 7.85   Tôi đi học vào buổi sáng.
+[✓] 4.38 vs 6.52   Trời hôm nay mưa rất to.
+[✓] 4.02 vs 6.85   Học sinh đang làm bài tập.
                                               → 5/5 đúng
 ```
 
@@ -41,21 +43,24 @@ Tokenizer byte-level BPE 16K: **0% `<unk>`**, khôi phục chính xác 100%,
 
 ```
 ▸ Thành phố Hồ Chí Minh nằm ở
-  vùng Đồng bằng sông Hồng trên núi Đồng bằng sông Hồng.
+  phía nam của tỉnh, có diện tích 15,96 km², dân số là 1.538 người,
+  mật độ dân số đạt 1.087 người/km².
 
   Lịch sử
-  Vị trí địa lý
-  Thành phố Hồ Chí Minh thuộc tỉnh Hà Tĩnh. Đây là một trong những
-  địa điểm du lịch đặc biệt quan trọng
+  Ngày 9 tháng 1 năm 2003, Chính phủ ban hành Nghị định số 11/2003/NĐ-CP
+  về việc thành lập
 ```
 
-Ngữ pháp và dấu tiếng Việt chuẩn, tự sinh đúng cấu trúc mục của Wikipedia
-(`Lịch sử`, `Vị trí địa lý`, `Tham khảo`). Nhưng **địa danh, tên riêng và
-sự kiện đều là bịa** — "TP.HCM thuộc tỉnh Hà Tĩnh" là sai hoàn toàn.
+Ngữ pháp và dấu tiếng Việt chuẩn. Model tự sinh đúng cấu trúc mục Wikipedia
+(`Lịch sử`, `Địa lý`, `Tham khảo`), đúng quy cách số nghị định, đơn vị đo,
+mật độ dân số.
 
-Đó là điều phải xảy ra ở 20M tham số với 4.84 token/tham số. Model học được
-*hình thức* của tiếng Việt Wikipedia, không học được *nội dung*. Perplexity
-thấp đo khả năng đoán token kế tiếp, không đo tính đúng đắn của thông tin.
+Nhưng **nội dung là bịa** — TP.HCM không phải "phía nam của tỉnh", dân số
+không phải 1.538 người, nghị định đó không tồn tại.
+
+Đó là giới hạn cứng ở 20M tham số. Model học được *hình thức* của tiếng Việt
+Wikipedia rất tốt, nhưng không đủ dung lượng cho *nội dung*. Perplexity thấp
+đo khả năng đoán token kế tiếp, không đo tính đúng đắn của thông tin.
 **Đừng dùng output làm nguồn tin.**
 
 Chạy thử: `python scripts/demo.py` · Chat: `python scripts/chat.py`
@@ -103,28 +108,38 @@ Chạy thử: `python scripts/demo.py` · Chat: `python scripts/chat.py`
 
 ## ⚙️ Cấu hình Mô hình & Training Budget
 
-Cấu hình mặc định trong [`configs/minivigpt_20m.yaml`](configs/minivigpt_20m.yaml):
+Repo có hai cấu hình cho cùng một kiến trúc 20M tham số:
 
-| Tham số | Giá trị |
-|---|---:|
-| **Vocabulary Size** | 16,000 byte-BPE tokens |
-| **Context Length (`max_seq_len`)** | 256 |
-| **Model Dimension ($d_{model}$)** | 384 |
-| **Num Layers** | 8 |
-| **Num Attention Heads** | 6 |
-| **Head Dimension** | 64 |
-| **SwiGLU Hidden Dimension** | 1,024 |
-| **Tổng số tham số (Parameters)** | **20,306,304** |
-| **Batch Size per update** | 48 (12 x 4 accum) |
-| **Tokens per update** | 12,288 |
-| **Total Max Steps** | 8,000 |
-| **Planned Tokens Trained** | 98,304,000 |
-| **Tokens / Parameter Ratio** | ~4.84 |
+| Tham số | [`minivigpt_20m.yaml`](configs/minivigpt_20m.yaml) | [`minivigpt_20m_chinchilla.yaml`](configs/minivigpt_20m_chinchilla.yaml) |
+|---|---:|---:|
+| **Vocabulary Size** | 16,000 byte-BPE | 16,000 byte-BPE |
+| **Context Length (`max_seq_len`)** | 256 | **512** |
+| **Model Dimension ($d_{model}$)** | 384 | 384 |
+| **Num Layers** | 8 | 8 |
+| **Num Attention Heads** | 6 | 6 |
+| **Head Dimension** | 64 | 64 |
+| **SwiGLU Hidden Dimension** | 1,024 | 1,024 |
+| **Tổng số tham số** | **20,306,304** | **20,306,304** |
+| **Batch × grad accum** | 12 × 4 | 6 × 4 |
+| **Tokens per update** | 12,288 | 12,288 |
+| **Total Max Steps** | 8,000 | **33,000** |
+| **Planned Tokens Trained** | 98,304,000 | **405,504,000** |
+| **Tokens / Parameter Ratio** | ~4.84 | **~19.97** |
+| **GPU-giờ (T4)** | ~2.0 | ~8.8 |
+| **Test perplexity** | 19.85 | **13.98** |
+
+`minivigpt_20m.yaml` là ngân sách "chạy nhanh cho biết" — 2 giờ là có kết quả.
+`minivigpt_20m_chinchilla.yaml` theo tỉ lệ Chinchilla (≈20 token/tham số) và
+cho perplexity thấp hơn 30%, đổi lại 4,4× GPU-giờ. Cả hai đều vừa một session
+Kaggle (giới hạn 9 giờ), nhưng bản Chinchilla chỉ dư ~12 phút.
+
+`tokens per update` giữ nguyên 12,288 ở cả hai để lịch learning rate không đổi
+khi ngữ cảnh tăng gấp đôi.
 
 Kiểm tra ngân sách huấn luyện bằng script:
 ```powershell
 $env:PYTHONPATH="$PWD/src"
-python scripts/estimate_training_budget.py --config configs/minivigpt_20m.yaml
+python scripts/estimate_training_budget.py --config configs/minivigpt_20m_chinchilla.yaml
 ```
 
 ---
@@ -189,7 +204,8 @@ dataset khác — nhờ vậy mỗi lần chạy bỏ qua được ~30 phút str
 ```powershell
 # source + config
 New-Item -ItemType Directory -Force $env:TEMP\mvg-src | Out-Null
-Copy-Item -Recurse -Force src\minivigpt $env:TEMP\mvg-srcCopy-Item configs\minivigpt_20m.yaml $env:TEMP\mvg-src\config.yaml
+Copy-Item -Recurse -Force src\minivigpt $env:TEMP\mvg-src\
+Copy-Item configs\minivigpt_20m_chinchilla.yaml $env:TEMP\mvg-src\config.yaml
 Remove-Item -Recurse -Force $env:TEMP\mvg-src\minivigpt\__pycache__ -EA SilentlyContinue
 # tạo dataset-metadata.json với id "<user>/minivigpt-src", rồi:
 kaggle datasets create -p $env:TEMP\mvg-src --dir-mode zip
@@ -244,8 +260,8 @@ In ra kiến trúc, chất lượng tokenizer, bài kiểm tra phân biệt ng�
 ```powershell
 $env:PYTHONPATH="$PWD/src"
 python -m minivigpt.generate `
-  --checkpoint artifacts/kaggle_run/checkpoint_best.pt `
-  --tokenizer artifacts/kaggle_run/tokenizer.json `
+  --checkpoint artifacts/kaggle_run_33k/checkpoint_best.pt `
+  --tokenizer artifacts/kaggle_run_33k/tokenizer.json `
   --prompt "Trí tuệ nhân tạo" `
   --max-new-tokens 120 --temperature 0.8 --top-k 50 --top-p 0.95
 ```
