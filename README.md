@@ -21,8 +21,7 @@ Mục tiêu dự án là giúp lập trình viên và nhà nghiên cứu hiểu 
 Chinchilla-optimal (≈20 token/tham số) giảm perplexity **30%**, đổi lại 4,4×
 GPU-giờ. Test đo **một lần duy nhất** ở cuối, từ checkpoint chọn theo validation.
 
-Chạy trên Kaggle T4 miễn phí. Val loss vẫn còn giảm khi kết thúc, nhưng rất
-chậm — ước tính 66.000 bước chỉ được ppl ~11,1, không đáng chi phí.
+Val loss vẫn còn giảm khi kết thúc, nhưng rất chậm — ước tính 66.000 bước chỉ được ppl ~11,1, không đáng chi phí.
 
 ### Model học được gì
 
@@ -130,8 +129,7 @@ Repo có hai cấu hình cho cùng một kiến trúc 20M tham số:
 
 `minivigpt_20m.yaml` là ngân sách "chạy nhanh cho biết" — 2 giờ là có kết quả.
 `minivigpt_20m_chinchilla.yaml` theo tỉ lệ Chinchilla (≈20 token/tham số) và
-cho perplexity thấp hơn 30%, đổi lại 4,4× GPU-giờ. Cả hai đều vừa một session
-Kaggle (giới hạn 9 giờ), nhưng bản Chinchilla chỉ dư ~12 phút.
+cho perplexity thấp hơn 30%, đổi lại 4,4× GPU-giờ.
 
 `tokens per update` giữ nguyên 12,288 ở cả hai để lịch learning rate không đổi
 khi ngữ cảnh tăng gấp đôi.
@@ -187,51 +185,12 @@ python -m minivigpt.train --config configs/minivigpt_debug.yaml
 
 ---
 
-### 4. Huấn luyện GPU trên Kaggle T4
-
-Repository hỗ trợ đẩy tiến trình training lên Kaggle GPU T4 miễn phí.
-
-#### 🔑 Đăng nhập Kaggle API:
-```powershell
-pip install -U kaggle
-kaggle auth login
-```
-
-#### 📦 Bước 1: Đẩy source và corpus thành Kaggle Dataset
-Notebook chạy trên Kaggle nạp code từ một dataset, và corpus đã tokenize từ một
-dataset khác — nhờ vậy mỗi lần chạy bỏ qua được ~30 phút stream + tokenize.
+### 4. Huấn luyện Mô hình GPU
 
 ```powershell
-# source + config
-New-Item -ItemType Directory -Force $env:TEMP\mvg-src | Out-Null
-Copy-Item -Recurse -Force src\minivigpt $env:TEMP\mvg-src\
-Copy-Item configs\minivigpt_20m_chinchilla.yaml $env:TEMP\mvg-src\config.yaml
-Remove-Item -Recurse -Force $env:TEMP\mvg-src\minivigpt\__pycache__ -EA SilentlyContinue
-# tạo dataset-metadata.json với id "<user>/minivigpt-src", rồi:
-kaggle datasets create -p $env:TEMP\mvg-src --dir-mode zip
-
-# corpus đã tokenize (chỉ cần một lần, ~239 MB)
-kaggle datasets create -p artifacts\local
+$env:PYTHONPATH="$PWD/src"
+python -m minivigpt.train --config configs/minivigpt_20m_chinchilla.yaml
 ```
-
-`--dir-mode zip` là bắt buộc — thiếu nó CLI in `Skipping folder: minivigpt` và
-không upload gì ngoài các file rời.
-
-#### 🚀 Bước 2: Push notebook và train
-```powershell
-kaggle kernels push -p scripts\kaggle --accelerator NvidiaTeslaT4
-kaggle kernels status <user>/minivigpt-train
-```
-
-`--accelerator` (và `machine_shape` trong `kernel-metadata.json`) là bắt buộc:
-nếu để Kaggle tự chọn, bạn có thể nhận P100 (`sm_60`) mà bản PyTorch trong image
-Kaggle không còn hỗ trợ, và mọi phép tính CUDA sẽ lỗi ngay.
-
-#### 🔄 Bước 3: Resume Training
-Kaggle giới hạn 9 giờ mỗi session. Lưu output lần chạy trước thành dataset rồi
-đính kèm — notebook tự tìm `checkpoint_latest.pt` dưới `/kaggle/input` và tiếp tục.
-
-Chi tiết và các cạm bẫy khác: [`scripts/kaggle/README.md`](scripts/kaggle/README.md).
 
 ---
 
